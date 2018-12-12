@@ -4,4 +4,3 @@ C:\Users\Matt\source\repos\VBA_DLL\VBA_DLL\bin\Release\TCPClient.pdb
 C:\Users\Matt\source\repos\VBA_DLL\VBA_DLL\obj\Release\VBA_DLL.csproj.CoreCompileInputs.cache
 C:\Users\Matt\source\repos\VBA_DLL\VBA_DLL\obj\Release\TCPClient.dll
 C:\Users\Matt\source\repos\VBA_DLL\VBA_DLL\obj\Release\TCPClient.pdb
-C:\Users\Matt\source\repos\VBA_DLL\VBA_DLL\obj\Release\VBA_DLL.csprojAssemblyReference.cache

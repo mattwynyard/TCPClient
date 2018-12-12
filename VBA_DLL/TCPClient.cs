@@ -26,15 +26,23 @@ namespace TCPClient
     [Guid("E2F07CD4-CE73-4102-B35D-119362624C47")]
     [ProgId("TCPClient.dll")]
 
+    /// <summary>
+    /// The class creates a TCP client which reads from local host port 38200 on a seperate thread acting as a client.
+    /// Data received from the server is put into a concurrent queue via a locking mechanism for thread safety.
+    /// The VBA program can call the getBuffer() method which puts the data in the queue into a string and returns it to VBA,
+    /// then set the queue to null, thus acting like a buffer.
+    /// </summary>
     public class Client : _Client
     {
         private ConcurrentQueue<string> dataQueue = new ConcurrentQueue<string>();
-        //private ArrayList data = new ArrayList();
         private Boolean mLock = false;
         private Boolean mConnected = false;
         private TcpClient client;
         private NetworkStream stream;
 
+     /// <summary>
+    /// The constructor for the Client which starts the Read method running on a new thread
+    /// </summary>
         public Client()
         {
 
