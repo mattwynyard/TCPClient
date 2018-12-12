@@ -1,0 +1,7 @@
+C:\Users\Matt\source\repos\VBA_DLL\VBA_DLL\bin\Debug\VBA_DLL.dll
+C:\Users\Matt\source\repos\VBA_DLL\VBA_DLL\bin\Debug\VBA_DLL.pdb
+C:\Users\Matt\source\repos\VBA_DLL\VBA_DLL\obj\Debug\VBA_DLL.csprojAssemblyReference.cache
+C:\Users\Matt\source\repos\VBA_DLL\VBA_DLL\obj\Debug\VBA_DLL.csproj.CoreCompileInputs.cache
+C:\Users\Matt\source\repos\VBA_DLL\VBA_DLL\obj\Debug\VBA_DLL.dll
+C:\Users\Matt\source\repos\VBA_DLL\VBA_DLL\obj\Debug\VBA_DLL.pdb
+C:\Users\Matt\source\repos\VBA_DLL\VBA_DLL\bin\Debug\VBA_DLL.tlb
