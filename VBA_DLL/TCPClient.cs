@@ -14,11 +14,11 @@ namespace TCPClient
 
     public interface IClient
     {
-        string getBuffer();
-        Boolean isConnected();
-        int sendCommand(String command);
-        void closeAll();
-        int connect(String path);
+        string GetBuffer();
+        Boolean IsConnected();
+        int SendCommand(String command);
+        void CloseAll();
+        int Connect(String path);
     }
 
     [ClassInterface(ClassInterfaceType.None)]
@@ -50,7 +50,9 @@ namespace TCPClient
             readThread.Start();
         }
         /// <summary>
-        /// The constructor for the Client which starts the Read method running on a new thread
+        /// Creates a new TCP Client and intialises input stream. When the server connects client reads incoming
+        /// data from the buffer. New data is added to a thread safe concurrent queue. This method runs on its own thread
+        /// and reads data in a blocking while loop.
         /// </summary>
         public void Read()
         {
@@ -109,8 +111,14 @@ namespace TCPClient
                 }
             }
         }
-
-        public int connect(String jarPath)
+        /// <summary>
+        /// Called by VBA to start java process which intialises a connection to android phone.
+        /// </summary>
+        /// <param name="jarPath">The path of the java executable.</param>
+        /// <returns>
+        /// Int - the process id or -1 if process didnt start or has stopped.
+        /// </returns>
+        public int Connect(String jarPath)
         {
             clientProcess = new Process();
             clientProcess.StartInfo.FileName = "java";
@@ -119,12 +127,20 @@ namespace TCPClient
             if (clientProcess.HasExited || clientProcess == null)
             {
                 return -1;
+            } else
+            {
+                return clientProcess.Id;
             }
-            return clientProcess.Id;
+            
         }
 
-        //Called by VBA
-        public string getBuffer()
+        /// <summary>
+        /// Called by VBA read messages in the queue. Returns messages and empties buffer.
+        /// </summary>
+        /// <returns>
+        /// String - the messages in the queue.
+        /// </returns>
+        public string GetBuffer()
         {
             string s = "";
             while (!mLock)
@@ -143,8 +159,16 @@ namespace TCPClient
             return s;
         }
 
-        //Called by VBA
-        public int sendCommand(String command)
+        /// <summary>
+        /// Called by VBA to send command to the sever.
+        /// </summary>
+        /// <param name="command">The string sent to the server .</param>
+        /// <returns>
+        /// Integer - Either 0 for success or -1 for failure
+        /// </returns>
+        /// <exception cref="System.IO.IOException">Thrown when the socket is closed.
+        /// and the other is greater than zero.</exception>
+        public int SendCommand(String command)
         {
             if (stream.CanWrite)
             {
@@ -164,19 +188,27 @@ namespace TCPClient
                 return -1;//failed
             }
         }
-
-        public Boolean isConnected()
+        /// <summary>
+        /// Called by VBA to check if connected to server.
+        /// </summary>
+        /// <returns>
+        /// Boolean - true if connected, false if not connected.
+        /// </returns>
+        public Boolean IsConnected()
         {
             return mConnected;
         }
 
-        public void closeAll()
+        /// <summary>
+        /// Called by VBA to close connection to server and kill process
+        /// </summary>
+        public void CloseAll()
         {
             if (client != null)
             {
                 mConnected = false;
-                stream.Close();
-                client.Close();
+                stream.Dispose();
+                client = null;
             }
             readThread = null;
             clientProcess.Kill();
