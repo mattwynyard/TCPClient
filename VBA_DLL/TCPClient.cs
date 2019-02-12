@@ -14,7 +14,7 @@ namespace TCPClient
 
     public interface IClient
     {
-        string GetBuffer();
+        String GetBuffer();
         Boolean IsConnected();
         int SendCommand(String command);
         void CloseAll();
@@ -40,6 +40,7 @@ namespace TCPClient
         private NetworkStream stream;
         private Thread readThread;
         private Process clientProcess;
+        private readonly object bufferLock = new Object();
 
         /// <summary>
         /// The constructor for the Client which starts the Read method running on a new thread
@@ -71,7 +72,7 @@ namespace TCPClient
                 {
                     //Console.WriteLine("server not ready...");
                     dataQueue = new ConcurrentQueue<string>();
-                    dataQueue.Enqueue(e.Message + '\n');
+                    dataQueue.Enqueue("server not ready...");
                     Thread.Sleep(100);
                 }
             }
@@ -87,26 +88,21 @@ namespace TCPClient
                             byte[] buffer = new byte[client.ReceiveBufferSize];
                             Int32 receiveCount = stream.Read(buffer, 0, buffer.Length);
                             received = new ASCIIEncoding().GetString(buffer, 0, receiveCount);
-                            while (!mLock)
+                            if (dataQueue == null)
                             {
-                                mLock = true;
-                                if (dataQueue == null)
-                                {
-                                    dataQueue = new ConcurrentQueue<string>();
-                                    dataQueue.Enqueue(received);
-                                }
-                                else
-                                {
-                                    dataQueue.Enqueue(received);
-                                }
+                                dataQueue = new ConcurrentQueue<string>();
+                                dataQueue.Enqueue(received);
                             }
-                            mLock = false;
+                            else
+                            {
+                                dataQueue.Enqueue(received);
+                            }
                         }
                     }
                     catch (IOException e)
                     {
                         //Console.WriteLine(e.Message);
-                        dataQueue.Enqueue(e.Message + '\n');
+                        dataQueue.Enqueue(e.Message);
                     }
                 }
             }
@@ -121,7 +117,7 @@ namespace TCPClient
         public int Connect(String jarPath)
         {
             clientProcess = new Process();
-            clientProcess.StartInfo.FileName = "java";
+            clientProcess.StartInfo.FileName = "javaw";
             clientProcess.StartInfo.Arguments = @"-jar " + jarPath;
             clientProcess.Start();
             if (clientProcess.HasExited || clientProcess == null)
@@ -140,12 +136,13 @@ namespace TCPClient
         /// <returns>
         /// String - the messages in the queue.
         /// </returns>
-        public string GetBuffer()
+        public String GetBuffer()
         {
             string s = "";
-            while (!mLock)
+            //while (!mLock)
+            lock(bufferLock)
             {
-                mLock = true;
+                //mLock = true;
                 if (dataQueue == null)
                 {
                     return "";
@@ -155,7 +152,7 @@ namespace TCPClient
                 s = string.Join(",", data);
                 data = null;
             }
-            mLock = false;
+            //mLock = false;
             return s;
         }
 
@@ -210,41 +207,10 @@ namespace TCPClient
                 stream.Dispose();
                 client = null;
             }
+            readThread.Abort();
             readThread = null;
             clientProcess.Kill();
         }
     }
 }
 
-//        static void Main(string[] args)
-//        {
-//            Client c = new Client();
-//            c.connect("C:\\IntelliJ_CameraApp.jar");
-//            int count = 0;
-//            while (true)
-//            {
-//                if (count == 200)
-//                {
-//                    Console.WriteLine("closing...");
-//                    try
-//                    {
-//                        c.closeAll();
-//                    }
-//                    catch (Exception e)
-//                    {
-//                        Console.WriteLine(e.Message);
-//                    }
-//                    break;
-//                }
-//                else
-//                {
-//                    String s = c.getBuffer();
-//                    Console.Write(s);
-//                    count++;
-//                    Thread.Sleep(1000);
-//                }
-
-//            }
-//        }
-//    }
-//}
