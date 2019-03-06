@@ -17,13 +17,12 @@ namespace TCPClient
         String GetBuffer();
         Boolean IsConnected();
         int SendCommand(String command);
-        void CloseAll();
-        int Connect(String path);
+        Boolean CloseAll();
+        int Connect(String path, Boolean mode, String camera);
     }
-
     [ClassInterface(ClassInterfaceType.None)]
     [Guid("E2F07CD4-CE73-4102-B35D-119362624C47")]
-    [ProgId("TCPClient.dll")]
+    [ProgId("TCPClient.Client")]
 
     /// <summary>
     /// The class creates a TCP client which reads from local host port 38200 on a seperate thread acting as a client.
@@ -105,6 +104,7 @@ namespace TCPClient
                         dataQueue.Enqueue(e.Message);
                     }
                 }
+                Thread.Sleep(100);
             }
         }
         /// <summary>
@@ -114,11 +114,17 @@ namespace TCPClient
         /// <returns>
         /// Int - the process id or -1 if process didnt start or has stopped.
         /// </returns>
-        public int Connect(String jarPath)
+        public int Connect(String jarPath, Boolean mode, String camera)
         {
             clientProcess = new Process();
-            clientProcess.StartInfo.FileName = "javaw";
-            clientProcess.StartInfo.Arguments = @"-jar " + jarPath;
+            if (mode)
+            {
+                clientProcess.StartInfo.FileName = "java";
+            } else
+            {
+                clientProcess.StartInfo.FileName = "javaw";
+            }
+            clientProcess.StartInfo.Arguments = @"-jar " + jarPath + " " + camera;
             clientProcess.Start();
             if (clientProcess.HasExited || clientProcess == null)
             {
@@ -199,7 +205,7 @@ namespace TCPClient
         /// <summary>
         /// Called by VBA to close connection to server and kill process
         /// </summary>
-        public void CloseAll()
+        public Boolean CloseAll()
         {
             if (client != null)
             {
@@ -210,7 +216,11 @@ namespace TCPClient
             readThread.Abort();
             readThread = null;
             clientProcess.Kill();
+            clientProcess.WaitForExit(1000);
+            return clientProcess.HasExited;
+
         }
     }
 }
+
 
