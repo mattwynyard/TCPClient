@@ -155,7 +155,7 @@ namespace TCPClient
                 }
                 String[] data = dataQueue.ToArray();
                 dataQueue = null;
-                s = string.Join(",", data);
+                s = string.Join("", data);
                 data = null;
             }
             //mLock = false;
