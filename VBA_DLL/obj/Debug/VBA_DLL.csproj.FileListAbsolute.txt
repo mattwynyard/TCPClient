@@ -7,3 +7,13 @@ C:\Users\Matt\source\repos\VBA_DLL\VBA_DLL\obj\Debug\TCPClient.Properties.Resour
 C:\Users\Matt\source\repos\VBA_DLL\VBA_DLL\obj\Debug\VBA_DLL.csproj.GenerateResource.cache
 C:\Users\Matt\source\repos\VBA_DLL\VBA_DLL\obj\Debug\TCPClient.dll
 C:\Users\Matt\source\repos\VBA_DLL\VBA_DLL\obj\Debug\TCPClient.pdb
+C:\VisualStudio\TCPClient\VBA_DLL\bin\Debug\TCPClient.dll.config
+C:\VisualStudio\TCPClient\VBA_DLL\bin\Debug\TCPClient.dll
+C:\VisualStudio\TCPClient\VBA_DLL\bin\Debug\TCPClient.pdb
+C:\VisualStudio\TCPClient\VBA_DLL\bin\Debug\TCPClient.tlb
+C:\VisualStudio\TCPClient\VBA_DLL\obj\Debug\TCPClient.Properties.Resources.resources
+C:\VisualStudio\TCPClient\VBA_DLL\obj\Debug\VBA_DLL.csproj.GenerateResource.cache
+C:\VisualStudio\TCPClient\VBA_DLL\obj\Debug\VBA_DLL.csproj.CoreCompileInputs.cache
+C:\VisualStudio\TCPClient\VBA_DLL\obj\Debug\TCPClient.dll
+C:\VisualStudio\TCPClient\VBA_DLL\obj\Debug\TCPClient.pdb
+C:\VisualStudio\TCPClient\VBA_DLL\obj\Debug\VBA_DLL.csprojAssemblyReference.cache
