@@ -6,23 +6,24 @@ using System.IO;
 using System.Threading;
 using System.Runtime.InteropServices;
 using System.Diagnostics;
+using System.Drawing;
 
 namespace TCPClient
 {
     [InterfaceType(ComInterfaceType.InterfaceIsDual)]
-    [Guid("01A31113-9353-44CC-A1F4-C6F1210E4B30")]
-
+    [Guid("EAA4976A-45C3-4BC5-BC0B-E474F4C3C83F")]
     public interface IClient
     {
         String GetBuffer();
+        byte[] GetPhotoBuffer();
+        Int32 GetPhotoLength();
         Boolean IsConnected();
         int SendCommand(String command);
         Boolean CloseAll();
         int Connect(String path, Boolean mode, String camera);
+        
     }
-    [ClassInterface(ClassInterfaceType.None)]
-    [Guid("E2F07CD4-CE73-4102-B35D-119362624C47")]
-    [ProgId("TCPClient.Client")]
+
 
     /// <summary>
     /// The class creates a TCP client which reads from local host port 38200 on a seperate thread acting as a client.
@@ -30,25 +31,110 @@ namespace TCPClient
     /// The VBA program can call the getBuffer() method which puts the data in the queue into a string and returns it to VBA,
     /// then set the queue to null, thus acting like a buffer.
     /// </summary>
+    [Guid("0D53A3E8-E51A-49C7-944E-E72A2064F938"),
+        ClassInterface(ClassInterfaceType.None)]
+    [ProgId("TCPClient.mClient")]
     public class Client : IClient
     {
         private ConcurrentQueue<string> dataQueue = new ConcurrentQueue<string>();
+        private ConcurrentQueue<byte[]> photoQueue = new ConcurrentQueue<byte[]>();
         private Boolean mLock = false;
         private Boolean mConnected = false;
+        private Boolean mConnectedB = false;
         private TcpClient client;
+        private TcpClient photoClient;
         private NetworkStream stream;
+        private NetworkStream photoStream;
         private Thread readThread;
+        private Thread readPhoto;
         private Process clientProcess;
         private readonly object bufferLock = new Object();
+        private Int32 photoLength;
+        private byte[] photo;
 
         /// <summary>
         /// The constructor for the Client which starts the Read method running on a new thread
         /// </summary>
+        
         public Client()
         {
             readThread = new Thread(Read);
             readThread.Start();
+            readPhoto = new Thread(ReadPhoto);
+            readPhoto.Start();
         }
+
+        public void ReadPhoto()
+        {
+            while (photoClient == null)
+            {
+                try
+                {
+                    photoClient = new TcpClient("localhost", 38300);
+                    if (photoClient.Connected == true)
+                    {
+                        photoStream = photoClient.GetStream();
+                        mConnectedB = true;
+                    }
+                }
+                catch (SocketException e) //not connected to server
+                {
+                    //dataQueue = new ConcurrentQueue<string>();
+                    //dataQueue.Enqueue("server not ready...");
+                    Thread.Sleep(100);
+                }
+            }
+            while (true)
+            {
+                if (photoStream.CanRead)
+                {
+                    try
+                    {
+                        if (photoStream.DataAvailable)
+                        {
+                            byte[] buffer = new byte[photoClient.ReceiveBufferSize];
+                            Int32 receiveCount = photoStream.Read(buffer, 0, buffer.Length);
+                            photoLength = receiveCount;
+                            byte[] photo = new byte[receiveCount];
+                            Buffer.BlockCopy(buffer, 0, photo, 0, receiveCount);
+                            MemoryStream ms = new MemoryStream(photo, 0, photo.Length);
+                            ms.Write(photo, 0, photo.Length);
+                            Image image = Image.FromStream(ms, true);
+                            //received = new ASCIIEncoding().GetString(buffer, 0, receiveCount);
+                            if (photoQueue == null)
+                            {
+                                photoQueue = new ConcurrentQueue<byte[]>();
+                                photoQueue.Enqueue(photo);
+                            }
+                            else
+                            {
+                                photoQueue.Enqueue(photo);
+                            }
+                        }
+                    }
+                    catch (IOException e)
+                    {
+                        dataQueue = new ConcurrentQueue<string>();
+                        dataQueue.Enqueue(e.Message);
+                    }
+                }
+                Thread.Sleep(100);
+            }
+        }
+
+        public class IconConverter : System.Windows.Forms.AxHost
+        {
+            private IconConverter() : base(string.Empty)
+            {
+            }
+
+            public static stdole.IPictureDisp GetIPictureDispFromImage(Image image)
+            {
+
+                return (stdole.IPictureDisp)GetIPictureDispFromPicture(image);
+            }
+        }
+
         /// <summary>
         /// Creates a new TCP Client and intialises input stream. When the server connects client reads incoming
         /// data from the buffer. New data is added to a thread safe concurrent queue. This method runs on its own thread
@@ -56,20 +142,22 @@ namespace TCPClient
         /// </summary>
         public void Read()
         {
-            while (client == null)
+            
+            while (client == null) 
             {
                 try
                 {
                     client = new TcpClient("localhost", 38200);
+          
                     if (client.Connected == true)
                     {
                         stream = client.GetStream();
                         mConnected = true;
+                        
                     }
                 }
                 catch (SocketException e) //not connected to server
                 {
-                    //Console.WriteLine("server not ready...");
                     dataQueue = new ConcurrentQueue<string>();
                     dataQueue.Enqueue("server not ready...");
                     Thread.Sleep(100);
@@ -100,13 +188,15 @@ namespace TCPClient
                     }
                     catch (IOException e)
                     {
-                        //Console.WriteLine(e.Message);
+                        dataQueue = new ConcurrentQueue<string>();
                         dataQueue.Enqueue(e.Message);
                     }
                 }
                 Thread.Sleep(100);
             }
         }
+
+
         /// <summary>
         /// Called by VBA to start java process which intialises a connection to android phone.
         /// </summary>
@@ -114,6 +204,7 @@ namespace TCPClient
         /// <returns>
         /// Int - the process id or -1 if process didnt start or has stopped.
         /// </returns>
+        [DispId(2)]
         public int Connect(String jarPath, Boolean mode, String camera)
         {
             clientProcess = new Process();
@@ -136,16 +227,51 @@ namespace TCPClient
             
         }
 
+        public Int32 GetPhotoLength()
+        {
+            if (photoLength != null)
+            {
+                return photoLength;
+            } else
+            {
+                return -1;
+            }
+            
+        }
+
+        public byte[] GetPhotoBuffer()
+        {
+            
+            //if (photo != null)
+            //{
+            //    return photo;
+            //} else
+            //{
+            //    return new byte[0];
+            //}
+            if (photoQueue != null)
+            {
+                byte[] data = new byte[photoLength];
+                photoQueue.TryDequeue(out data);
+                return data;
+            }
+            else
+            {
+                return new byte[0];
+            }
+
+        }
+
         /// <summary>
         /// Called by VBA read messages in the queue. Returns messages and empties buffer.
         /// </summary>
         /// <returns>
         /// String - the messages in the queue.
         /// </returns>
+        [DispId(4)]
         public String GetBuffer()
         {
             string s = "";
-            //while (!mLock)
             lock(bufferLock)
             {
                 //mLock = true;
@@ -156,9 +282,7 @@ namespace TCPClient
                 String[] data = dataQueue.ToArray();
                 dataQueue = null;
                 s = string.Join("", data);
-                data = null;
             }
-            //mLock = false;
             return s;
         }
 
@@ -171,6 +295,7 @@ namespace TCPClient
         /// </returns>
         /// <exception cref="System.IO.IOException">Thrown when the socket is closed.
         /// and the other is greater than zero.</exception>
+        [DispId(5)]
         public int SendCommand(String command)
         {
             if (stream.CanWrite)
@@ -197,6 +322,7 @@ namespace TCPClient
         /// <returns>
         /// Boolean - true if connected, false if not connected.
         /// </returns>
+        [DispId(6)]
         public Boolean IsConnected()
         {
             return mConnected;
@@ -205,6 +331,7 @@ namespace TCPClient
         /// <summary>
         /// Called by VBA to close connection to server and kill process
         /// </summary>
+        [DispId(7)]
         public Boolean CloseAll()
         {
             if (client != null)
@@ -222,5 +349,8 @@ namespace TCPClient
         }
     }
 }
+
+
+
 
 
