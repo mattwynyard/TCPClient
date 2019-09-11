@@ -7,6 +7,8 @@ using System.Threading;
 using System.Runtime.InteropServices;
 using System.Diagnostics;
 using System.Drawing;
+using System.Windows.Forms;
+using stdole;
 
 namespace TCPClient
 {
@@ -15,7 +17,7 @@ namespace TCPClient
     public interface IClient
     {
         String GetBuffer();
-        byte[] GetPhotoBuffer();
+        IPictureDisp GetPhotoBuffer();
         Int32 GetPhotoLength();
         Boolean IsConnected();
         int SendCommand(String command);
@@ -37,7 +39,7 @@ namespace TCPClient
     public class Client : IClient
     {
         private ConcurrentQueue<string> dataQueue = new ConcurrentQueue<string>();
-        private ConcurrentQueue<byte[]> photoQueue = new ConcurrentQueue<byte[]>();
+        private ConcurrentQueue<IPictureDisp> photoQueue = new ConcurrentQueue<IPictureDisp>();
         private Boolean mLock = false;
         private Boolean mConnected = false;
         private Boolean mConnectedB = false;
@@ -51,6 +53,7 @@ namespace TCPClient
         private readonly object bufferLock = new Object();
         private Int32 photoLength;
         private byte[] photo;
+        private IPictureDisp pict;
 
         /// <summary>
         /// The constructor for the Client which starts the Read method running on a new thread
@@ -99,16 +102,21 @@ namespace TCPClient
                             Buffer.BlockCopy(buffer, 0, photo, 0, receiveCount);
                             MemoryStream ms = new MemoryStream(photo, 0, photo.Length);
                             ms.Write(photo, 0, photo.Length);
-                            Image image = Image.FromStream(ms, true);
-                            //received = new ASCIIEncoding().GetString(buffer, 0, receiveCount);
+                            Image image = Image.FromStream(ms, false);
+                            Image bitmap = new Bitmap(image);
+                            
+                            pict = IPictureDispHost.GetIPictureDispFromImage(bitmap);
+                            //ImageConverter converter = new ImageConverter();
+                            //byte[] b = (byte[])converter.ConvertTo(bitmap, typeof(byte[]));
+                            //photoLength = b.Length;
                             if (photoQueue == null)
                             {
-                                photoQueue = new ConcurrentQueue<byte[]>();
-                                photoQueue.Enqueue(photo);
+                                photoQueue = new ConcurrentQueue<IPictureDisp>();
+                                photoQueue.Enqueue(pict);
                             }
                             else
                             {
-                                photoQueue.Enqueue(photo);
+                                photoQueue.Enqueue(pict);
                             }
                         }
                     }
@@ -122,16 +130,16 @@ namespace TCPClient
             }
         }
 
-        public class IconConverter : System.Windows.Forms.AxHost
+        public class IPictureDispHost : AxHost
         {
-            private IconConverter() : base(string.Empty)
+            private IPictureDispHost() : base(string.Empty)
             {
             }
 
-            public static stdole.IPictureDisp GetIPictureDispFromImage(Image image)
+            public static IPictureDisp GetIPictureDispFromImage(Image image)
             {
 
-                return (stdole.IPictureDisp)GetIPictureDispFromPicture(image);
+                return (IPictureDisp)GetIPictureDispFromPicture(image);
             }
         }
 
@@ -239,7 +247,7 @@ namespace TCPClient
             
         }
 
-        public byte[] GetPhotoBuffer()
+        public IPictureDisp GetPhotoBuffer()
         {
             
             //if (photo != null)
@@ -251,13 +259,14 @@ namespace TCPClient
             //}
             if (photoQueue != null)
             {
-                byte[] data = new byte[photoLength];
-                photoQueue.TryDequeue(out data);
-                return data;
+                //byte[] data = new byte[photoLength];
+                IPictureDisp picture;
+                photoQueue.TryDequeue(out picture);
+                return picture;
             }
             else
             {
-                return new byte[0];
+                return null;
             }
 
         }
