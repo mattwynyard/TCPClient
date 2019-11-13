@@ -1,4 +1,3 @@
-C:\Users\Matt\source\repos\VBA_DLL\VBA_DLL\obj\Debug\VBA_DLL.csproj.CoreCompileInputs.cache
 C:\Users\Matt\source\repos\VBA_DLL\VBA_DLL\bin\Debug\TCPClient.dll.config
 C:\Users\Matt\source\repos\VBA_DLL\VBA_DLL\bin\Debug\TCPClient.dll
 C:\Users\Matt\source\repos\VBA_DLL\VBA_DLL\bin\Debug\TCPClient.pdb

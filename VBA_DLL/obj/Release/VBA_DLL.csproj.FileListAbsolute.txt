@@ -1,7 +1,7 @@
-C:\Users\Matt\source\repos\VBA_DLL\VBA_DLL\bin\Release\TCPClient.dll
 C:\Users\Matt\source\repos\VBA_DLL\VBA_DLL\bin\Release\TCPClient.tlb
 C:\Users\Matt\source\repos\VBA_DLL\VBA_DLL\bin\Release\TCPClient.dll.config
 C:\Users\Matt\source\repos\VBA_DLL\VBA_DLL\bin\Release\TCPClient.xml
+C:\Users\Matt\source\repos\VBA_DLL\VBA_DLL\bin\Release\TCPClient.dll
 C:\Users\Matt\source\repos\VBA_DLL\VBA_DLL\bin\Release\TCPClient.pdb
 C:\Users\Matt\source\repos\VBA_DLL\VBA_DLL\obj\Release\TCPClient.Properties.Resources.resources
 C:\Users\Matt\source\repos\VBA_DLL\VBA_DLL\obj\Release\VBA_DLL.csproj.GenerateResource.cache
