@@ -8,7 +8,7 @@ using System.Runtime.InteropServices;
 using System.Diagnostics;
 using System.Drawing;
 using System.Windows.Forms;
-using stdole;
+//using stdole;
 
 namespace TCPClient
 {
@@ -17,8 +17,8 @@ namespace TCPClient
     public interface IClient
     {
         String GetBuffer();
-        IPictureDisp GetPhotoBuffer();
-        Int32 GetPhotoLength();
+        //IPictureDisp GetPhotoBuffer();
+        //Int32 GetPhotoLength();
         Boolean IsConnected();
         int SendCommand(String command);
         Boolean CloseAll();
@@ -39,21 +39,21 @@ namespace TCPClient
     public class Client : IClient
     {
         private ConcurrentQueue<string> dataQueue = new ConcurrentQueue<string>();
-        private ConcurrentQueue<IPictureDisp> photoQueue = new ConcurrentQueue<IPictureDisp>();
-        private Boolean mLock = false;
+        //private ConcurrentQueue<IPictureDisp> photoQueue = new ConcurrentQueue<IPictureDisp>();
+        //private Boolean mLock = false;
         private Boolean mConnected = false;
-        private Boolean mConnectedB = false;
+        //private Boolean mConnectedB = false;
         private TcpClient client;
-        private TcpClient photoClient;
+        //private TcpClient photoClient;
         private NetworkStream stream;
         private NetworkStream photoStream;
         private Thread readThread;
-        private Thread readPhoto;
+        //private Thread readPhoto;
         private Process clientProcess;
         private readonly object bufferLock = new Object();
         private Int32 photoLength;
-        private byte[] photo;
-        private IPictureDisp pict;
+        //private byte[] photo;
+        //private IPictureDisp pict;
 
         /// <summary>
         /// The constructor for the Client which starts the Read method running on a new thread
@@ -63,85 +63,85 @@ namespace TCPClient
         {
             readThread = new Thread(Read);
             readThread.Start();
-            readPhoto = new Thread(ReadPhoto);
-            readPhoto.Start();
+            //readPhoto = new Thread(ReadPhoto);
+            //readPhoto.Start();
         }
 
-        public void ReadPhoto()
-        {
-            while (photoClient == null)
-            {
-                try
-                {
-                    photoClient = new TcpClient("localhost", 38300);
-                    if (photoClient.Connected == true)
-                    {
-                        photoStream = photoClient.GetStream();
-                        mConnectedB = true;
-                    }
-                }
-                catch (SocketException e) //not connected to server
-                {
-                    //dataQueue = new ConcurrentQueue<string>();
-                    //dataQueue.Enqueue("server not ready...");
-                    Thread.Sleep(100);
-                }
-            }
-            while (true)
-            {
-                if (photoStream.CanRead)
-                {
-                    try
-                    {
-                        if (photoStream.DataAvailable)
-                        {
-                            byte[] buffer = new byte[photoClient.ReceiveBufferSize];
-                            Int32 receiveCount = photoStream.Read(buffer, 0, buffer.Length);
-                            photoLength = receiveCount;
-                            byte[] photo = new byte[receiveCount];
-                            Buffer.BlockCopy(buffer, 0, photo, 0, receiveCount);
-                            MemoryStream ms = new MemoryStream(photo, 0, photo.Length);
-                            ms.Write(photo, 0, photo.Length);
-                            Image image = Image.FromStream(ms, false);
-                            Image bitmap = new Bitmap(image);
+        //public void ReadPhoto()
+        //{
+        //    while (photoClient == null)
+        //    {
+        //        try
+        //        {
+        //            photoClient = new TcpClient("localhost", 38300);
+        //            if (photoClient.Connected == true)
+        //            {
+        //                photoStream = photoClient.GetStream();
+        //                mConnectedB = true;
+        //            }
+        //        }
+        //        catch (SocketException e) //not connected to server
+        //        {
+        //            //dataQueue = new ConcurrentQueue<string>();
+        //            //dataQueue.Enqueue("server not ready...");
+        //            Thread.Sleep(100);
+        //        }
+        //    }
+        //    while (true)
+        //    {
+        //        if (photoStream.CanRead)
+        //        {
+        //            try
+        //            {
+        //                if (photoStream.DataAvailable)
+        //                {
+        //                    byte[] buffer = new byte[photoClient.ReceiveBufferSize];
+        //                    Int32 receiveCount = photoStream.Read(buffer, 0, buffer.Length);
+        //                    photoLength = receiveCount;
+        //                    byte[] photo = new byte[receiveCount];
+        //                    Buffer.BlockCopy(buffer, 0, photo, 0, receiveCount);
+        //                    MemoryStream ms = new MemoryStream(photo, 0, photo.Length);
+        //                    ms.Write(photo, 0, photo.Length);
+        //                    Image image = Image.FromStream(ms, false);
+        //                    Image bitmap = new Bitmap(image);
                             
-                            pict = IPictureDispHost.GetIPictureDispFromImage(bitmap);
-                            //ImageConverter converter = new ImageConverter();
-                            //byte[] b = (byte[])converter.ConvertTo(bitmap, typeof(byte[]));
-                            //photoLength = b.Length;
-                            if (photoQueue == null)
-                            {
-                                photoQueue = new ConcurrentQueue<IPictureDisp>();
-                                photoQueue.Enqueue(pict);
-                            }
-                            else
-                            {
-                                photoQueue.Enqueue(pict);
-                            }
-                        }
-                    }
-                    catch (IOException e)
-                    {
-                        dataQueue = new ConcurrentQueue<string>();
-                        dataQueue.Enqueue(e.Message);
-                    }
-                }
-                Thread.Sleep(100);
-            }
-        }
+        //                    pict = IPictureDispHost.GetIPictureDispFromImage(bitmap);
+        //                    //ImageConverter converter = new ImageConverter();
+        //                    //byte[] b = (byte[])converter.ConvertTo(bitmap, typeof(byte[]));
+        //                    //photoLength = b.Length;
+        //                    if (photoQueue == null)
+        //                    {
+        //                        photoQueue = new ConcurrentQueue<IPictureDisp>();
+        //                        photoQueue.Enqueue(pict);
+        //                    }
+        //                    else
+        //                    {
+        //                        photoQueue.Enqueue(pict);
+        //                    }
+        //                }
+        //            }
+        //            catch (IOException e)
+        //            {
+        //                dataQueue = new ConcurrentQueue<string>();
+        //                dataQueue.Enqueue(e.Message);
+        //            }
+        //        }
+        //        Thread.Sleep(100);
+        //    }
+        //}
 
-        public class IPictureDispHost : AxHost
-        {
-            private IPictureDispHost() : base(string.Empty)
-            {
-            }
+        //public class IPictureDispHost : AxHost
+        //{
+        //    private IPictureDispHost() : base(string.Empty)
+        //    {
+        //    }
 
-            public static IPictureDisp GetIPictureDispFromImage(Image image)
-            {
+        //    public static IPictureDisp GetIPictureDispFromImage(Image image)
+        //    {
 
-                return (IPictureDisp)GetIPictureDispFromPicture(image);
-            }
-        }
+        //        return (IPictureDisp)GetIPictureDispFromPicture(image);
+        //    }
+        //}
 
         /// <summary>
         /// Creates a new TCP Client and intialises input stream. When the server connects client reads incoming
@@ -235,41 +235,41 @@ namespace TCPClient
             
         }
 
-        public Int32 GetPhotoLength()
-        {
-            if (photoLength != null)
-            {
-                return photoLength;
-            } else
-            {
-                return -1;
-            }
+        //public Int32 GetPhotoLength()
+        //{
+        //    if (photoLength != null)
+        //    {
+        //        return photoLength;
+        //    } else
+        //    {
+        //        return -1;
+        //    }
             
-        }
+        //}
 
-        public IPictureDisp GetPhotoBuffer()
-        {
+        //public IPictureDisp GetPhotoBuffer()
+        //{
             
-            //if (photo != null)
-            //{
-            //    return photo;
-            //} else
-            //{
-            //    return new byte[0];
-            //}
-            if (photoQueue != null)
-            {
-                //byte[] data = new byte[photoLength];
-                IPictureDisp picture;
-                photoQueue.TryDequeue(out picture);
-                return picture;
-            }
-            else
-            {
-                return null;
-            }
+        //    //if (photo != null)
+        //    //{
+        //    //    return photo;
+        //    //} else
+        //    //{
+        //    //    return new byte[0];
+        //    //}
+        //    if (photoQueue != null)
+        //    {
+        //        //byte[] data = new byte[photoLength];
+        //        IPictureDisp picture;
+        //        photoQueue.TryDequeue(out picture);
+        //        return picture;
+        //    }
+        //    else
+        //    {
+        //        return null;
+        //    }
 
-        }
+        //}
 
         /// <summary>
         /// Called by VBA read messages in the queue. Returns messages and empties buffer.
