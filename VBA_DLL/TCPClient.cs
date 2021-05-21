@@ -16,13 +16,12 @@ namespace TCPClient
     [Guid("EAA4976A-45C3-4BC5-BC0B-E474F4C3C83F")]
     public interface IClient
     {
-        String GetBuffer();
-        //IPictureDisp GetPhotoBuffer();
-        //Int32 GetPhotoLength();
-        Boolean IsConnected();
+        string GetBuffer();
+
+        bool IsConnected();
         int SendCommand(String command);
         Boolean CloseAll();
-        int Connect(String path, Boolean mode, String camera);
+        int Connect(string jarPath, bool mode, string camera, string path);
         
     }
 
@@ -42,7 +41,6 @@ namespace TCPClient
         private Boolean mConnected = false;
         private TcpClient client;
         private NetworkStream stream;
-        private NetworkStream photoStream;
         private Thread readThread;
         private Process clientProcess;
         private readonly object bufferLock = new Object();
@@ -69,18 +67,16 @@ namespace TCPClient
                 try
                 {
                     client = new TcpClient("localhost", 38200);
-          
-                    if (client.Connected == true)
+                    if (client.Connected)
                     {
                         stream = client.GetStream();
-                        mConnected = true;
-                        
+                        mConnected = true;                   
                     }
                 }
                 catch (SocketException e) //not connected to server
                 {
                     dataQueue = new ConcurrentQueue<string>();
-                    dataQueue.Enqueue("server not ready...");
+                    dataQueue.Enqueue("server waiting...");
                     Thread.Sleep(100);
                 }
             }
@@ -113,7 +109,7 @@ namespace TCPClient
                         dataQueue.Enqueue(e.Message);
                     }
                 }
-                Thread.Sleep(100);
+                Thread.Sleep(10);
             }
         }
 
@@ -126,7 +122,7 @@ namespace TCPClient
         /// Int - the process id or -1 if process didnt start or has stopped.
         /// </returns>
         [DispId(2)]
-        public int Connect(String jarPath, Boolean mode, String camera)
+        public int Connect(string jarPath, bool mode, string camera, string path)
         {
             clientProcess = new Process();
             if (mode)
@@ -136,7 +132,7 @@ namespace TCPClient
             {
                 clientProcess.StartInfo.FileName = "javaw";
             }
-            clientProcess.StartInfo.Arguments = @"-jar " + jarPath + " " + camera;
+            clientProcess.StartInfo.Arguments = @"-jar " + jarPath + " " + camera + " " + path;
             clientProcess.Start();
             if (clientProcess.HasExited || clientProcess == null)
             {
@@ -160,7 +156,6 @@ namespace TCPClient
             string s = "";
             lock(bufferLock)
             {
-                //mLock = true;
                 if (dataQueue == null)
                 {
                     return "";
