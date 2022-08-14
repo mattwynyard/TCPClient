@@ -17,7 +17,6 @@ C:\VisualStudio\TCPClient\VBA_DLL\obj\Debug\TCPClient.dll
 C:\VisualStudio\TCPClient\VBA_DLL\obj\Debug\TCPClient.pdb
 C:\VisualStudio\TCPClient\VBA_DLL\obj\Debug\VBA_DLL.csprojAssemblyReference.cache
 C:\Users\Matt\source\repos\VBA_DLL\VBA_DLL\obj\Debug\VBA_DLL.csprojAssemblyReference.cache
-C:\Users\Matt.ONSITE.000\source\repos\VBA_DLL\VBA_DLL\obj\Debug\VBA_DLL.csprojAssemblyReference.cache
 C:\Users\Matt.ONSITE.000\source\repos\VBA_DLL\VBA_DLL\obj\Debug\TCPClient.Properties.Resources.resources
 C:\Users\Matt.ONSITE.000\source\repos\VBA_DLL\VBA_DLL\obj\Debug\VBA_DLL.csproj.GenerateResource.cache
 C:\Users\Matt.ONSITE.000\source\repos\VBA_DLL\VBA_DLL\bin\Debug\TCPClient.dll.config
@@ -27,3 +26,13 @@ C:\Users\Matt.ONSITE.000\source\repos\VBA_DLL\VBA_DLL\bin\Debug\TCPClient.tlb
 C:\Users\Matt.ONSITE.000\source\repos\VBA_DLL\VBA_DLL\obj\Debug\TCPClient.dll
 C:\Users\Matt.ONSITE.000\source\repos\VBA_DLL\VBA_DLL\obj\Debug\TCPClient.pdb
 C:\Users\Matt.ONSITE.000\source\repos\VBA_DLL\VBA_DLL\obj\Debug\VBA_DLL.csproj.CoreCompileInputs.cache
+C:\Users\matt\Documents\_Onsite\VBA_DLL\VBA_DLL\bin\Debug\TCPClient.dll
+C:\Users\matt\Documents\_Onsite\VBA_DLL\VBA_DLL\bin\Debug\TCPClient.tlb
+C:\Users\matt\Documents\_Onsite\VBA_DLL\VBA_DLL\bin\Debug\TCPClient.dll.config
+C:\Users\matt\Documents\_Onsite\VBA_DLL\VBA_DLL\obj\Debug\TCPClient.Properties.Resources.resources
+C:\Users\matt\Documents\_Onsite\VBA_DLL\VBA_DLL\obj\Debug\VBA_DLL.csproj.GenerateResource.cache
+C:\Users\matt\Documents\_Onsite\VBA_DLL\VBA_DLL\obj\Debug\VBA_DLL.csproj.CoreCompileInputs.cache
+C:\Users\matt\Documents\_Onsite\VBA_DLL\VBA_DLL\obj\Debug\TCPClient.dll
+C:\Users\matt\Documents\_Onsite\VBA_DLL\VBA_DLL\obj\Debug\TCPClient.pdb
+C:\Users\matt\Documents\_Onsite\VBA_DLL\VBA_DLL\bin\Debug\TCPClient.pdb
+C:\Users\matt\Documents\_Onsite\VBA_DLL\VBA_DLL\obj\Debug\VBA_DLL.csproj.AssemblyReference.cache

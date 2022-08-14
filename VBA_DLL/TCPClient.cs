@@ -6,9 +6,6 @@ using System.IO;
 using System.Threading;
 using System.Runtime.InteropServices;
 using System.Diagnostics;
-using System.Drawing;
-using System.Windows.Forms;
-//using stdole;
 
 namespace TCPClient
 {
@@ -17,15 +14,11 @@ namespace TCPClient
     public interface IClient
     {
         string GetBuffer();
-
         bool IsConnected();
         int SendCommand(String command);
         Boolean CloseAll();
-        int Connect(string jarPath, bool mode, string camera, string path);
-        
+        int Connect(string jarPath, bool mode, string inspector, string path, bool hasPhone, bool hasMap);    
     }
-
-
     /// <summary>
     /// The class creates a TCP client which reads from local host port 38200 on a seperate thread acting as a client.
     /// Data received from the server is put into a concurrent queue via a locking mechanism for thread safety.
@@ -38,7 +31,7 @@ namespace TCPClient
     public class Client : IClient
     {
         private ConcurrentQueue<string> dataQueue = new ConcurrentQueue<string>();
-        private Boolean mConnected = false;
+        private bool mConnected = false;
         private TcpClient client;
         private NetworkStream stream;
         private Thread readThread;
@@ -53,15 +46,13 @@ namespace TCPClient
             readThread = new Thread(Read);
             readThread.Start();
         }
-
         /// <summary>
         /// Creates a new TCP Client and intialises input stream. When the server connects client reads incoming
         /// data from the buffer. New data is added to a thread safe concurrent queue. This method runs on its own thread
         /// and reads data in a blocking while loop.
         /// </summary>
         public void Read()
-        {
-            
+        {  
             while (client == null) 
             {
                 try
@@ -80,11 +71,9 @@ namespace TCPClient
                     Thread.Sleep(100);
                 }
             }
-            while (true)
+            while (stream.CanRead)
             {
                 string received = null;
-                if (stream.CanRead)
-                {
                     try
                     {
                         if (stream.DataAvailable)
@@ -108,11 +97,8 @@ namespace TCPClient
                         dataQueue = new ConcurrentQueue<string>();
                         dataQueue.Enqueue(e.Message);
                     }
-                }
-                Thread.Sleep(10);
             }
         }
-
 
         /// <summary>
         /// Called by VBA to start java process which intialises a connection to android phone.
@@ -122,7 +108,7 @@ namespace TCPClient
         /// Int - the process id or -1 if process didnt start or has stopped.
         /// </returns>
         [DispId(2)]
-        public int Connect(string jarPath, bool mode, string camera, string path)
+        public int Connect(string jarPath, bool mode, string inspector, string path, bool hasPhone, bool hasMap)
         {
             clientProcess = new Process();
             if (mode)
@@ -132,16 +118,22 @@ namespace TCPClient
             {
                 clientProcess.StartInfo.FileName = "javaw";
             }
-            clientProcess.StartInfo.Arguments = @"-jar " + jarPath + " " + camera + " " + path;
-            clientProcess.Start();
-            if (clientProcess.HasExited || clientProcess == null)
+            clientProcess.StartInfo.Arguments = @"-jar " + jarPath + " " + hasPhone + " " + hasMap + " " + inspector + " " + path;
+            try
+            {
+                clientProcess.Start();
+                if (clientProcess.HasExited || clientProcess == null)
+                {
+                    return -1;
+                }
+                else
+                {
+                    return clientProcess.Id;
+                }
+            } catch (Exception err)
             {
                 return -1;
-            } else
-            {
-                return clientProcess.Id;
             }
-            
         }
 
         /// <summary>
@@ -151,20 +143,21 @@ namespace TCPClient
         /// String - the messages in the queue.
         /// </returns>
         [DispId(4)]
-        public String GetBuffer()
+        public string GetBuffer()
         {
-            string s = "";
-            lock(bufferLock)
+            string line = "";
+            lock (bufferLock)
             {
+                
                 if (dataQueue == null)
                 {
                     return "";
                 }
-                String[] data = dataQueue.ToArray();
+                string[] data = dataQueue.ToArray();
                 dataQueue = null;
-                s = string.Join("", data);
+                line = string.Join("", data);
             }
-            return s;
+            return line;
         }
 
         /// <summary>
@@ -177,7 +170,7 @@ namespace TCPClient
         /// <exception cref="System.IO.IOException">Thrown when the socket is closed.
         /// and the other is greater than zero.</exception>
         [DispId(5)]
-        public int SendCommand(String command)
+        public int SendCommand(string command)
         {
             if (stream.CanWrite)
             {
@@ -185,7 +178,7 @@ namespace TCPClient
                 {
                     byte[] buffer = Encoding.ASCII.GetBytes(command);
                     stream.Write(buffer, 0, buffer.Length);
-                    return 0; //success
+                    return 0; 
                 }
                 catch (IOException e)
                 {
@@ -204,7 +197,7 @@ namespace TCPClient
         /// Boolean - true if connected, false if not connected.
         /// </returns>
         [DispId(6)]
-        public Boolean IsConnected()
+        public bool IsConnected()
         {
             return mConnected;
         }
@@ -213,7 +206,7 @@ namespace TCPClient
         /// Called by VBA to close connection to server and kill process
         /// </summary>
         [DispId(7)]
-        public Boolean CloseAll()
+        public bool CloseAll()
         {
             if (client != null)
             {
