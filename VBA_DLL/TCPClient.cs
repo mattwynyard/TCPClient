@@ -98,6 +98,7 @@ namespace TCPClient
                         dataQueue.Enqueue(e.Message);
                     }
             }
+            CloseAll();
         }
 
         /// <summary>
@@ -132,6 +133,7 @@ namespace TCPClient
                 }
             } catch (Exception err)
             {
+                clientProcess = null;
                 return -1;
             }
         }
