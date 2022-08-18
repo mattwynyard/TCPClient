@@ -35,4 +35,3 @@ C:\Users\matt\Documents\_Onsite\VBA_DLL\VBA_DLL\obj\Debug\VBA_DLL.csproj.CoreCom
 C:\Users\matt\Documents\_Onsite\VBA_DLL\VBA_DLL\obj\Debug\TCPClient.dll
 C:\Users\matt\Documents\_Onsite\VBA_DLL\VBA_DLL\obj\Debug\TCPClient.pdb
 C:\Users\matt\Documents\_Onsite\VBA_DLL\VBA_DLL\bin\Debug\TCPClient.pdb
-C:\Users\matt\Documents\_Onsite\VBA_DLL\VBA_DLL\obj\Debug\VBA_DLL.csproj.AssemblyReference.cache

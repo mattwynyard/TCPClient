@@ -16,7 +16,7 @@ namespace TCPClient
         string GetBuffer();
         bool IsConnected();
         int SendCommand(String command);
-        Boolean CloseAll();
+        bool CloseAll();
         int Connect(string jarPath, bool mode, string inspector, string path, bool hasPhone, bool hasMap);    
     }
     /// <summary>
@@ -125,7 +125,7 @@ namespace TCPClient
                 clientProcess.Start();
                 if (clientProcess.HasExited || clientProcess == null)
                 {
-                    return -1;
+                    return 0;
                 }
                 else
                 {
@@ -133,8 +133,8 @@ namespace TCPClient
                 }
             } catch (Exception err)
             {
-                clientProcess = null;
-                return -1;
+                //clientProcess = null;
+                return 0;
             }
         }
 
@@ -150,12 +150,12 @@ namespace TCPClient
             string line = "";
             lock (bufferLock)
             {
-                
                 if (dataQueue == null)
                 {
                     return "";
                 }
                 string[] data = dataQueue.ToArray();
+               
                 dataQueue = null;
                 line = string.Join("", data);
             }
@@ -201,7 +201,21 @@ namespace TCPClient
         [DispId(6)]
         public bool IsConnected()
         {
-            return mConnected;
+            try
+            {
+                if (clientProcess != null && !clientProcess.HasExited)
+                {
+                    return true;
+                }
+                else
+                {
+                    return false;
+                }
+            } catch
+            {
+                return false;
+            }
+            //return mConnected;    
         }
 
         /// <summary>
@@ -212,10 +226,11 @@ namespace TCPClient
         {
             if (client != null)
             {
-                mConnected = false;
+                
                 stream.Dispose();
                 client = null;
             }
+            mConnected = false;
             readThread.Abort();
             readThread = null;
             clientProcess.Kill();
