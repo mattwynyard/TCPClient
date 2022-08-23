@@ -15,8 +15,10 @@ namespace TCPClient
     {
         string GetBuffer();
         bool IsConnected();
+
+        bool IsJavaRunning();
         int SendCommand(String command);
-        bool CloseAll();
+        void CloseAll();
         int Connect(string jarPath, bool mode, string inspector, string path, bool hasPhone, bool hasMap);    
     }
     /// <summary>
@@ -31,12 +33,12 @@ namespace TCPClient
     public class Client : IClient
     {
         private ConcurrentQueue<string> dataQueue = new ConcurrentQueue<string>();
-        private bool mConnected = false;
         private TcpClient client;
         private NetworkStream stream;
         private Thread readThread;
         private Process clientProcess;
         private readonly object bufferLock = new Object();
+        private bool mConnected;
 
         /// <summary>
         /// The constructor for the Client which starts the Read method running on a new thread
@@ -45,6 +47,7 @@ namespace TCPClient
         {
             readThread = new Thread(Read);
             readThread.Start();
+            mConnected = false;
         }
         /// <summary>
         /// Creates a new TCP Client and intialises input stream. When the server connects client reads incoming
@@ -61,7 +64,7 @@ namespace TCPClient
                     if (client.Connected)
                     {
                         stream = client.GetStream();
-                        mConnected = true;                   
+                        mConnected = true;
                     }
                 }
                 catch (SocketException e) //not connected to server
@@ -92,11 +95,12 @@ namespace TCPClient
                             }
                         }
                     }
-                    catch (IOException e)
+                    catch (Exception e)
                     {
                         dataQueue = new ConcurrentQueue<string>();
                         dataQueue.Enqueue(e.Message);
-                    }
+                        mConnected = false;
+                }
             }
             CloseAll();
         }
@@ -199,7 +203,7 @@ namespace TCPClient
         /// Boolean - true if connected, false if not connected.
         /// </returns>
         [DispId(6)]
-        public bool IsConnected()
+        public bool IsJavaRunning()
         {
             try
             {
@@ -214,29 +218,36 @@ namespace TCPClient
             } catch
             {
                 return false;
-            }
-            //return mConnected;    
+            }  
         }
 
         /// <summary>
         /// Called by VBA to close connection to server and kill process
         /// </summary>
         [DispId(7)]
-        public bool CloseAll()
+        public void CloseAll()
         {
-            if (client != null)
+            try
             {
-                
                 stream.Dispose();
                 client = null;
-            }
-            mConnected = false;
-            readThread.Abort();
-            readThread = null;
-            clientProcess.Kill();
-            clientProcess.WaitForExit(1000);
-            return clientProcess.HasExited;
 
+                readThread.Abort();
+                readThread = null;
+                if (clientProcess != null)
+                {
+                    clientProcess.Close();
+                    clientProcess.WaitForExit(1000);
+                }
+            } catch (Exception err)
+            {
+            }
+        }
+
+        [DispId(8)]
+        public bool IsConnected()
+        {
+            return mConnected;
         }
     }
 }
