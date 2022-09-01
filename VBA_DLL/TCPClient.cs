@@ -6,6 +6,7 @@ using System.IO;
 using System.Threading;
 using System.Runtime.InteropServices;
 using System.Diagnostics;
+using System.Management;
 
 namespace TCPClient
 {
@@ -18,8 +19,9 @@ namespace TCPClient
         bool IsJavaRunning();
         int SendCommand(String command);
         void CloseAll();
-        int Connect(string jarPath, bool mode, string inspector, string path, bool hasPhone, bool hasMap);
-        bool CloseJava();
+        int ConnectPhone(string jarPath, bool mode, string inspector, string path, bool hasPhone, bool hasMap);
+        void KillProcessAndChildren(int pid);
+        int StartNodeServer(string parentDirectory, bool debug);
     }
     /// <summary>
     /// The class creates a TCP client which reads from local host port 38200 on a seperate thread acting as a client.
@@ -37,6 +39,7 @@ namespace TCPClient
         private NetworkStream stream;
         private Thread readThread;
         private Process clientProcess;
+        private Process nodeProcess;
         private readonly object bufferLock = new Object();
         private bool mConnected;
 
@@ -103,8 +106,7 @@ namespace TCPClient
                         mConnected = false;
                 }
             }
-            mConnected = false;
-            CloseAll();
+            KillProcessAndChildren(clientProcess.Id);
         }
 
         /// <summary>
@@ -115,7 +117,7 @@ namespace TCPClient
         /// Int - the process id or -1 if process didnt start or has stopped.
         /// </returns>
         [DispId(2)]
-        public int Connect(string jarPath, bool mode, string inspector, string path, bool hasPhone, bool hasMap)
+        public int ConnectPhone(string jarPath, bool mode, string inspector, string path, bool hasPhone, bool hasMap)
         {
             clientProcess = new Process();
             if (mode)
@@ -228,17 +230,11 @@ namespace TCPClient
             {
                 stream.Close();
                 client = null;
-
-                readThread.Abort();
                 readThread = null;
-                if (clientProcess != null)
-                {
-                    clientProcess.Kill();
-                    //clientProcess.WaitForExit(1000);
-                }
+                mConnected = false;
             } catch (Exception err)
             {
-                dataQueue.Enqueue(err.Message);
+                //dataQueue.Enqueue(err.Message);
             }
         }
 
@@ -249,18 +245,49 @@ namespace TCPClient
         }
 
         [DispId(9)]
-        public bool CloseJava()
+        public void KillProcessAndChildren(int pid)
         {
+            CloseAll();
+            ManagementObjectSearcher processSearcher = new ManagementObjectSearcher
+              ("Select * From Win32_Process Where ParentProcessID=" + pid);
+            ManagementObjectCollection processCollection = processSearcher.Get();
             try
             {
-                clientProcess.Kill();
-                dataQueue.Enqueue("shutdown");
-                return true;
-            } catch (Exception err)
-            {
-
-                return false;
+                Process proc = Process.GetProcessById(pid);
+                if (!proc.HasExited) proc.Kill();
             }
+            catch (ArgumentException)
+            {
+                // Process already exited.
+            }
+
+            if (processCollection != null)
+            {
+                foreach (ManagementObject mo in processCollection)
+                {
+                    KillProcessAndChildren(Convert.ToInt32(mo["ProcessID"]));
+                }
+            }
+        }
+
+        [DispId(10)]
+        public int StartNodeServer(string parentDirectory, bool debug)
+        {
+            nodeProcess = new Process();
+            nodeProcess.StartInfo.WorkingDirectory = parentDirectory;
+            nodeProcess.StartInfo.FileName = "cmd.exe";
+            nodeProcess.StartInfo.Arguments = "/c node src/app.js";
+            //nodeProcess.StartInfo.RedirectStandardOutput = true;
+            if (debug)
+            {
+                nodeProcess.StartInfo.WindowStyle = ProcessWindowStyle.Normal;
+            } 
+            else 
+            {
+                nodeProcess.StartInfo.WindowStyle = ProcessWindowStyle.Hidden;
+            }
+            nodeProcess.Start();
+            return clientProcess.Id;
         }
     }
 }
