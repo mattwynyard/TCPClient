@@ -6,6 +6,7 @@ using System.IO;
 using System.Threading;
 using System.Runtime.InteropServices;
 using System.Diagnostics;
+using System.Management;
 
 namespace TCPClient
 {
@@ -15,9 +16,12 @@ namespace TCPClient
     {
         string GetBuffer();
         bool IsConnected();
+        bool IsJavaRunning();
         int SendCommand(String command);
-        Boolean CloseAll();
-        int Connect(string jarPath, bool mode, string inspector, string path, bool hasPhone, bool hasMap);    
+        void CloseAll();
+        int ConnectPhone(string jarPath, bool mode, string inspector, string path, bool hasPhone, bool hasMap);
+        void KillProcessAndChildren(int pid);
+        int StartNodeServer(string parentDirectory, bool debug);
     }
     /// <summary>
     /// The class creates a TCP client which reads from local host port 38200 on a seperate thread acting as a client.
@@ -31,12 +35,13 @@ namespace TCPClient
     public class Client : IClient
     {
         private ConcurrentQueue<string> dataQueue = new ConcurrentQueue<string>();
-        private bool mConnected = false;
         private TcpClient client;
         private NetworkStream stream;
         private Thread readThread;
         private Process clientProcess;
+        private Process nodeProcess;
         private readonly object bufferLock = new Object();
+        private bool mConnected;
 
         /// <summary>
         /// The constructor for the Client which starts the Read method running on a new thread
@@ -45,6 +50,7 @@ namespace TCPClient
         {
             readThread = new Thread(Read);
             readThread.Start();
+            mConnected = false;
         }
         /// <summary>
         /// Creates a new TCP Client and intialises input stream. When the server connects client reads incoming
@@ -61,7 +67,7 @@ namespace TCPClient
                     if (client.Connected)
                     {
                         stream = client.GetStream();
-                        mConnected = true;                   
+                        
                     }
                 }
                 catch (SocketException e) //not connected to server
@@ -73,6 +79,7 @@ namespace TCPClient
             }
             while (stream.CanRead)
             {
+                mConnected = true;
                 string received = null;
                     try
                     {
@@ -92,13 +99,14 @@ namespace TCPClient
                             }
                         }
                     }
-                    catch (IOException e)
+                    catch (Exception e)
                     {
                         dataQueue = new ConcurrentQueue<string>();
                         dataQueue.Enqueue(e.Message);
-                    }
+                        mConnected = false;
+                }
             }
-            CloseAll();
+            KillProcessAndChildren(clientProcess.Id);
         }
 
         /// <summary>
@@ -109,7 +117,7 @@ namespace TCPClient
         /// Int - the process id or -1 if process didnt start or has stopped.
         /// </returns>
         [DispId(2)]
-        public int Connect(string jarPath, bool mode, string inspector, string path, bool hasPhone, bool hasMap)
+        public int ConnectPhone(string jarPath, bool mode, string inspector, string path, bool hasPhone, bool hasMap)
         {
             clientProcess = new Process();
             if (mode)
@@ -125,7 +133,7 @@ namespace TCPClient
                 clientProcess.Start();
                 if (clientProcess.HasExited || clientProcess == null)
                 {
-                    return -1;
+                    return 0;
                 }
                 else
                 {
@@ -133,8 +141,8 @@ namespace TCPClient
                 }
             } catch (Exception err)
             {
-                clientProcess = null;
-                return -1;
+                //clientProcess = null;
+                return 0;
             }
         }
 
@@ -150,12 +158,12 @@ namespace TCPClient
             string line = "";
             lock (bufferLock)
             {
-                
                 if (dataQueue == null)
                 {
                     return "";
                 }
                 string[] data = dataQueue.ToArray();
+               
                 dataQueue = null;
                 line = string.Join("", data);
             }
@@ -192,36 +200,94 @@ namespace TCPClient
                 return -1;//failed
             }
         }
-        /// <summary>
-        /// Called by VBA to check if connected to server.
-        /// </summary>
-        /// <returns>
-        /// Boolean - true if connected, false if not connected.
-        /// </returns>
+
         [DispId(6)]
-        public bool IsConnected()
+        public bool IsJavaRunning()
         {
-            return mConnected;
+            try
+            {
+                if (clientProcess != null && !clientProcess.HasExited)
+                {
+                    return true;
+                }
+                else
+                {
+                    return false;
+                }
+            } catch
+            {
+                return false;
+            }  
         }
 
         /// <summary>
         /// Called by VBA to close connection to server and kill process
         /// </summary>
         [DispId(7)]
-        public bool CloseAll()
+        public void CloseAll()
         {
-            if (client != null)
+            try
             {
-                mConnected = false;
-                stream.Dispose();
+                stream.Close();
                 client = null;
+                readThread = null;
+                mConnected = false;
+            } catch (Exception err)
+            {
+                //dataQueue.Enqueue(err.Message);
             }
-            readThread.Abort();
-            readThread = null;
-            clientProcess.Kill();
-            clientProcess.WaitForExit(1000);
-            return clientProcess.HasExited;
+        }
 
+        [DispId(8)]
+        public bool IsConnected()
+        {
+            return mConnected;
+        }
+
+        [DispId(9)]
+        public void KillProcessAndChildren(int pid)
+        {
+            CloseAll();
+            ManagementObjectSearcher processSearcher = new ManagementObjectSearcher
+              ("Select * From Win32_Process Where ParentProcessID=" + pid);
+            ManagementObjectCollection processCollection = processSearcher.Get();
+            try
+            {
+                Process proc = Process.GetProcessById(pid);
+                if (!proc.HasExited) proc.Kill();
+            }
+            catch (ArgumentException)
+            {
+                // Process already exited.
+            }
+
+            if (processCollection != null)
+            {
+                foreach (ManagementObject mo in processCollection)
+                {
+                    KillProcessAndChildren(Convert.ToInt32(mo["ProcessID"]));
+                }
+            }
+        }
+
+        [DispId(10)]
+        public int StartNodeServer(string parentDirectory, bool debug)
+        {
+            nodeProcess = new Process();
+            nodeProcess.StartInfo.WorkingDirectory = parentDirectory;
+            nodeProcess.StartInfo.FileName = "cmd.exe";
+            nodeProcess.StartInfo.Arguments = "/c node src/app.js";
+            //nodeProcess.StartInfo.RedirectStandardOutput = true;
+            if (debug)
+            {
+                nodeProcess.StartInfo.WindowStyle = ProcessWindowStyle.Normal;
+            } 
+            else 
+            {
+                nodeProcess.StartInfo.WindowStyle = ProcessWindowStyle.Hidden;
+            }
+            nodeProcess.Start();
+            return clientProcess.Id;
         }
     }
 }
