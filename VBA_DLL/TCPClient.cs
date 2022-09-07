@@ -141,7 +141,6 @@ namespace TCPClient
                 }
             } catch (Exception err)
             {
-                //clientProcess = null;
                 return 0;
             }
         }
@@ -277,7 +276,6 @@ namespace TCPClient
             nodeProcess.StartInfo.WorkingDirectory = parentDirectory;
             nodeProcess.StartInfo.FileName = "cmd.exe";
             nodeProcess.StartInfo.Arguments = "/c node src/app.js";
-            //nodeProcess.StartInfo.RedirectStandardOutput = true;
             if (debug)
             {
                 nodeProcess.StartInfo.WindowStyle = ProcessWindowStyle.Normal;
