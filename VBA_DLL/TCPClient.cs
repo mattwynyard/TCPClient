@@ -19,7 +19,7 @@ namespace TCPClient
         bool IsJavaRunning();
         int SendCommand(String command);
         void CloseAll();
-        int ConnectPhone(string jarPath, bool mode, string inspector, string path, bool hasPhone, bool hasMap);
+        int ConnectPhone(string jarPath, string logpath, bool mode, string inspector, string path, bool hasPhone, bool hasMap);
         void KillProcessAndChildren(int pid);
         int StartNodeServer(string parentDirectory, bool debug);
     }
@@ -117,7 +117,7 @@ namespace TCPClient
         /// Int - the process id or -1 if process didnt start or has stopped.
         /// </returns>
         [DispId(2)]
-        public int ConnectPhone(string jarPath, bool mode, string inspector, string path, bool hasPhone, bool hasMap)
+        public int ConnectPhone(string jarPath, string logpath, bool mode, string inspector, string path, bool hasPhone, bool hasMap)
         {
             clientProcess = new Process();
             if (mode)
@@ -127,7 +127,7 @@ namespace TCPClient
             {
                 clientProcess.StartInfo.FileName = "javaw";
             }
-            clientProcess.StartInfo.Arguments = @"-jar " + jarPath + " " + hasPhone + " " + hasMap + " " + inspector + " " + path;
+            clientProcess.StartInfo.Arguments = @"-jar " + jarPath + " " + logpath + " " + hasPhone + " " + hasMap + " " + inspector + " " + path;
             try
             {
                 clientProcess.Start();

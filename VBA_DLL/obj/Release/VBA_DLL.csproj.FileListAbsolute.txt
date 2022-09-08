@@ -23,7 +23,6 @@ C:\Users\matt\Documents\_Onsite\VBA_DLL\VBA_DLL\bin\Release\TCPClient.dll.config
 C:\Users\matt\Documents\_Onsite\VBA_DLL\VBA_DLL\bin\Release\TCPClient.xml
 C:\Users\matt\Documents\_Onsite\VBA_DLL\VBA_DLL\bin\Release\TCPClient.dll
 C:\Users\matt\Documents\_Onsite\VBA_DLL\VBA_DLL\bin\Release\TCPClient.pdb
-C:\Users\matt\Documents\_Onsite\VBA_DLL\VBA_DLL\obj\Release\VBA_DLL.csproj.AssemblyReference.cache
 C:\Users\matt\Documents\_Onsite\VBA_DLL\VBA_DLL\obj\Release\TCPClient.Properties.Resources.resources
 C:\Users\matt\Documents\_Onsite\VBA_DLL\VBA_DLL\obj\Release\VBA_DLL.csproj.GenerateResource.cache
 C:\Users\matt\Documents\_Onsite\VBA_DLL\VBA_DLL\obj\Release\VBA_DLL.csproj.CoreCompileInputs.cache
