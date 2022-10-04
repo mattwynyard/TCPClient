@@ -44,13 +44,4 @@ S:\VBA_DLL\VBA_DLL\obj\Debug\VBA_DLL.csproj.GenerateResource.cache
 S:\VBA_DLL\VBA_DLL\obj\Debug\VBA_DLL.csproj.CoreCompileInputs.cache
 S:\VBA_DLL\VBA_DLL\obj\Debug\TCPClient.dll
 S:\VBA_DLL\VBA_DLL\obj\Debug\TCPClient.pdb
-\\onsite1\OnsiteSSD\VBA_DLL\VBA_DLL\bin\Debug\TCPClient.dll.config
-\\onsite1\OnsiteSSD\VBA_DLL\VBA_DLL\bin\Debug\TCPClient.dll
-\\onsite1\OnsiteSSD\VBA_DLL\VBA_DLL\bin\Debug\TCPClient.pdb
-\\onsite1\OnsiteSSD\VBA_DLL\VBA_DLL\bin\Debug\TCPClient.tlb
-\\onsite1\OnsiteSSD\VBA_DLL\VBA_DLL\obj\Debug\VBA_DLL.csprojAssemblyReference.cache
-\\onsite1\OnsiteSSD\VBA_DLL\VBA_DLL\obj\Debug\TCPClient.Properties.Resources.resources
-\\onsite1\OnsiteSSD\VBA_DLL\VBA_DLL\obj\Debug\VBA_DLL.csproj.GenerateResource.cache
-\\onsite1\OnsiteSSD\VBA_DLL\VBA_DLL\obj\Debug\VBA_DLL.csproj.CoreCompileInputs.cache
-\\onsite1\OnsiteSSD\VBA_DLL\VBA_DLL\obj\Debug\TCPClient.dll
-\\onsite1\OnsiteSSD\VBA_DLL\VBA_DLL\obj\Debug\TCPClient.pdb
+C:\Users\matt\Documents\_Onsite\VBA_DLL\VBA_DLL\obj\Debug\VBA_DLL.csproj.AssemblyReference.cache
