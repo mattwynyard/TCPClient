@@ -44,3 +44,4 @@ S:\VBA_DLL\VBA_DLL\obj\Debug\VBA_DLL.csproj.GenerateResource.cache
 S:\VBA_DLL\VBA_DLL\obj\Debug\VBA_DLL.csproj.CoreCompileInputs.cache
 S:\VBA_DLL\VBA_DLL\obj\Debug\TCPClient.dll
 S:\VBA_DLL\VBA_DLL\obj\Debug\TCPClient.pdb
+C:\Users\matt\Documents\_Onsite\VBA_DLL\VBA_DLL\obj\Debug\VBA_DLL.csproj.AssemblyReference.cache
