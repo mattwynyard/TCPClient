@@ -19,9 +19,10 @@ namespace TCPClient
         bool IsJavaRunning();
         int SendCommand(String command);
         void CloseAll();
-        int ConnectJava(string jarPath, string logpath, bool mode, string inspector, string path, bool hasPhone, bool hasMap);
-        void KillProcessAndChildren(int pid);
-        int StartNodeServer(string parentDirectory, bool debug);
+        //int ConnectJava(string jarPath, string logpath, bool mode, string inspector, string path, bool hasPhone, bool hasMap);
+        int Connect(string jarPath, bool mode, string camera, string path);
+        //void KillProcessAndChildren(int pid);
+        //int StartNodeServer(string parentDirectory, bool debug);
     }
     /// <summary>
     /// The class creates a TCP client which reads from local host port 38200 on a seperate thread acting as a client.
@@ -106,7 +107,8 @@ namespace TCPClient
                         mConnected = false;
                 }
             }
-            KillProcessAndChildren(clientProcess.Id);
+            CloseAll();
+            //KillProcessAndChildren(clientProcess.Id);
         }
 
         /// <summary>
@@ -117,7 +119,8 @@ namespace TCPClient
         /// Int - the process id or -1 if process didnt start or has stopped.
         /// </returns>
         [DispId(2)]
-        public int ConnectJava(string jarPath, string logpath, bool mode, string inspector, string path, bool hasPhone, bool hasMap)
+        //public int ConnectJava(string jarPath, string logpath, bool mode, string inspector, string path, bool hasPhone, bool hasMap)
+        public int Connect(string jarPath, bool mode, string camera, string path)
         {
             clientProcess = new Process();
             if (mode)
@@ -127,7 +130,8 @@ namespace TCPClient
             {
                 clientProcess.StartInfo.FileName = "javaw";
             }
-            clientProcess.StartInfo.Arguments = @"-jar " + jarPath + " " + logpath + " " + hasPhone + " " + hasMap + " " + inspector + " " + path;
+            //clientProcess.StartInfo.Arguments = @"-jar " + jarPath + " " + logpath + " " + hasPhone + " " + hasMap + " " + inspector + " " + path;
+            clientProcess.StartInfo.Arguments = @"-jar " + jarPath + " " + camera + " " + path;
             try
             {
                 clientProcess.Start();
@@ -231,6 +235,7 @@ namespace TCPClient
                 client = null;
                 readThread = null;
                 mConnected = false;
+                KillProcessAndChildren(clientProcess.Id);
             } catch (Exception err)
             {
                 //dataQueue.Enqueue(err.Message);
@@ -244,9 +249,8 @@ namespace TCPClient
         }
 
         [DispId(9)]
-        public void KillProcessAndChildren(int pid)
+        private void KillProcessAndChildren(int pid)
         {
-            CloseAll();
             ManagementObjectSearcher processSearcher = new ManagementObjectSearcher
               ("Select * From Win32_Process Where ParentProcessID=" + pid);
             ManagementObjectCollection processCollection = processSearcher.Get();
