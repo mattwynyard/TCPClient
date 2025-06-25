@@ -104,11 +104,9 @@ namespace TCPClient
                     {
                         dataQueue = new ConcurrentQueue<string>();
                         dataQueue.Enqueue(e.Message);
-                        mConnected = false;
-                }
+                    }
             }
             CloseAll();
-            //KillProcessAndChildren(clientProcess.Id);
         }
 
         /// <summary>
@@ -119,7 +117,6 @@ namespace TCPClient
         /// Int - the process id or -1 if process didnt start or has stopped.
         /// </returns>
         [DispId(2)]
-        //public int ConnectJava(string jarPath, string logpath, bool mode, string inspector, string path, bool hasPhone, bool hasMap)
         public int Connect(string jarPath, bool mode, string camera, string path)
         {
             clientProcess = new Process();
@@ -130,7 +127,6 @@ namespace TCPClient
             {
                 clientProcess.StartInfo.FileName = "javaw";
             }
-            //clientProcess.StartInfo.Arguments = @"-jar " + jarPath + " " + logpath + " " + hasPhone + " " + hasMap + " " + inspector + " " + path;
             clientProcess.StartInfo.Arguments = @"-jar " + jarPath + " " + camera + " " + path;
             try
             {
